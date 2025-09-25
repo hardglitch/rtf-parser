@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::{fmt, mem};
 
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "jsbindings")]
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::document::RtfDocument;
@@ -20,7 +21,7 @@ macro_rules! header_control_word {
 }
 
 #[derive(Debug, Default, PartialEq, Clone, Deserialize, Serialize)]
-#[wasm_bindgen(getter_with_clone)]
+#[cfg_attr(feature = "jsbindings", wasm_bindgen(getter_with_clone))]
 pub struct StyleBlock {
     pub painter: Painter,
     pub paragraph: Paragraph,
@@ -28,7 +29,7 @@ pub struct StyleBlock {
 }
 
 #[derive(Debug, Clone, PartialEq, Hash, Deserialize, Serialize)]
-#[wasm_bindgen]
+#[cfg_attr(feature = "jsbindings", wasm_bindgen)]
 pub struct Painter {
     pub color_ref: ColorRef,
     pub font_ref: FontRef,
