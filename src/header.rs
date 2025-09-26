@@ -36,8 +36,7 @@ pub struct Style {
 
 /// Information about the document, including references to fonts & styles
 #[derive(Default, Debug, Clone, PartialEq, Deserialize, Serialize)]
-#[cfg_attr(feature = "jsbindings", derive(Tsify))]
-#[cfg_attr(feature = "jsbindings", tsify(into_wasm_abi, from_wasm_abi))]
+#[cfg_attr(feature = "jsbindings", derive(Tsify), tsify(into_wasm_abi, from_wasm_abi))]
 pub struct RtfHeader {
     pub character_set: CharacterSet,
     pub font_table: FontTable,
@@ -63,8 +62,7 @@ pub struct Color {
 
 #[allow(dead_code)]
 #[derive(Debug, PartialEq, Default, Clone, Hash, Deserialize, Serialize)]
-#[cfg_attr(feature = "jsbindings", derive(Tsify))]
-#[cfg_attr(feature = "jsbindings", tsify(into_wasm_abi, from_wasm_abi))]
+#[cfg_attr(feature = "jsbindings", derive(Tsify), tsify(into_wasm_abi, from_wasm_abi))]
 pub enum CharacterSet {
     #[default]
     Ansi,
@@ -86,8 +84,7 @@ impl CharacterSet {
 
 #[allow(dead_code)]
 #[derive(Debug, PartialEq, Hash, Clone, Default, Deserialize, Serialize)]
-#[cfg_attr(feature = "jsbindings", derive(Tsify))]
-#[cfg_attr(feature = "jsbindings", tsify(into_wasm_abi, from_wasm_abi))]
+#[cfg_attr(feature = "jsbindings", derive(Tsify), tsify(into_wasm_abi, from_wasm_abi))]
 pub enum FontFamily {
     #[default]
     Nil,

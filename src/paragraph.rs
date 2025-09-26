@@ -19,8 +19,7 @@ pub struct Paragraph {
 
 /// Alignement of a paragraph (left, right, center, justify)
 #[derive(Debug, Default, Clone, Copy, PartialEq, Hash, Deserialize, Serialize)]
-#[cfg_attr(feature = "jsbindings", derive(Tsify))]
-#[cfg_attr(feature = "jsbindings", tsify(into_wasm_abi, from_wasm_abi))]
+#[cfg_attr(feature = "jsbindings", derive(Tsify), tsify(into_wasm_abi, from_wasm_abi))]
 pub enum Alignment {
     #[default]
     LeftAligned, // \ql
@@ -52,8 +51,7 @@ pub struct Spacing {
 }
 
 #[derive(Default, Debug, Clone, Copy, PartialEq, Hash, Deserialize, Serialize)]
-#[cfg_attr(feature = "jsbindings", derive(Tsify))]
-#[cfg_attr(feature = "jsbindings", tsify(into_wasm_abi, from_wasm_abi))]
+#[cfg_attr(feature = "jsbindings", derive(Tsify), tsify(into_wasm_abi, from_wasm_abi))]
 pub enum SpaceBetweenLine {
     Value(i32),
     #[default]
