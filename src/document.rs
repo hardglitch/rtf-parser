@@ -3,6 +3,7 @@ use std::fs;
 use std::io::Read;
 
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "jsbindings")]
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::header::RtfHeader;
@@ -10,13 +11,13 @@ use crate::lexer::Lexer;
 use crate::parser::{Parser, StyleBlock};
 
 // Interface to WASM to be used in JS
-#[wasm_bindgen]
+#[cfg_attr(feature = "jsbindings", wasm_bindgen)]
 pub fn parse_rtf(rtf: String) -> RtfDocument {
     return RtfDocument::try_from(rtf).unwrap();
 }
 
 #[derive(Debug, Default, Clone, PartialEq, Deserialize, Serialize)]
-#[wasm_bindgen(getter_with_clone)]
+#[cfg_attr(feature = "jsbindings", wasm_bindgen(getter_with_clone))]
 pub struct RtfDocument {
     pub header: RtfHeader,
     pub body: Vec<StyleBlock>,

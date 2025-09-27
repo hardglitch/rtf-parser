@@ -1,7 +1,9 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+#[cfg(feature = "jsbindings")]
 use tsify::Tsify;
+#[cfg(feature = "jsbindings")]
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::paragraph::Paragraph;
@@ -33,8 +35,8 @@ pub struct Style {
 }
 
 /// Information about the document, including references to fonts & styles
-#[derive(Default, Debug, Clone, PartialEq, Deserialize, Serialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
+#[derive(Default, Debug, Clone, PartialEq, Deserialize, Serialize)]
+#[cfg_attr(feature = "jsbindings", derive(Tsify), tsify(into_wasm_abi, from_wasm_abi))]
 pub struct RtfHeader {
     pub character_set: CharacterSet,
     pub font_table: FontTable,
@@ -43,7 +45,7 @@ pub struct RtfHeader {
 }
 
 #[derive(Hash, Default, Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[wasm_bindgen(getter_with_clone)]
+#[cfg_attr(feature = "jsbindings", wasm_bindgen(getter_with_clone))]
 pub struct Font {
     pub name: String,
     pub character_set: u8,
@@ -51,7 +53,7 @@ pub struct Font {
 }
 
 #[derive(Hash, Default, Clone, Debug, PartialEq, Deserialize, Serialize)]
-#[wasm_bindgen]
+#[cfg_attr(feature = "jsbindings", wasm_bindgen)]
 pub struct Color {
     pub red: u8,
     pub green: u8,
@@ -59,8 +61,8 @@ pub struct Color {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, PartialEq, Default, Clone, Hash, Deserialize, Serialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
+#[derive(Debug, PartialEq, Default, Clone, Hash, Deserialize, Serialize)]
+#[cfg_attr(feature = "jsbindings", derive(Tsify), tsify(into_wasm_abi, from_wasm_abi))]
 pub enum CharacterSet {
     #[default]
     Ansi,
@@ -81,8 +83,8 @@ impl CharacterSet {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, PartialEq, Hash, Clone, Default, Deserialize, Serialize, Tsify)]
-#[tsify(into_wasm_abi, from_wasm_abi)]
+#[derive(Debug, PartialEq, Hash, Clone, Default, Deserialize, Serialize)]
+#[cfg_attr(feature = "jsbindings", derive(Tsify), tsify(into_wasm_abi, from_wasm_abi))]
 pub enum FontFamily {
     #[default]
     Nil,
