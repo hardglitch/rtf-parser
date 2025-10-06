@@ -79,7 +79,7 @@ impl Lexer {
         Ok(tokens)
     }
 
-    /// Get a string slice cut but the scanner and return the coreesponding token(s)
+    /// Get a string slice cut by the scanner and return the corresponding token(s)
     fn tokenize(slice: &str) -> Result<Vec<Token>, LexerError> {
         let mut starting_chars = slice.trim_matches(' ').chars().take(2);
         return match (starting_chars.next(), starting_chars.next()) {
@@ -88,18 +88,18 @@ impl Lexer {
                 '{' | '}' | '\\' => {
                     // Handle escaped chars
                     let tail = slice.get(1..).unwrap_or("");
-                    return Ok(vec![Token::PlainText(tail)]); // No recursive tokenize here, juste some plain text because the char is escaped
+                    Ok(vec![Token::PlainText(tail)]) // Escaped single char -> plain text
                 }
                 '\'' => {
-                    // Escaped unicode in hex value : \'f0
+                    // Escaped unicode hex value: \'f0
                     let tail = slice.get(1..).unwrap_or("");
                     if tail.len() < 2 {
                         return Err(LexerError::InvalidUnicode(tail.into()));
                     }
-                    let byte = u8::from_str_radix(&tail[1..3], 16)?; // f0
+                    let byte = u8::from_str_radix(&tail[1..3], 16)?;
                     let mut ret = vec![Token::ControlSymbol((ControlWord::Unicode, Property::Value(byte as i32)))];
                     recursive_tokenize!(&tail[3..], ret);
-                    return Ok(ret);
+                    Ok(ret)
                 }
                 '\n' => {
                     // CRLF
@@ -107,29 +107,36 @@ impl Lexer {
                     if let Some(tail) = slice.get(2..) {
                         recursive_tokenize!(tail, ret);
                     }
-                    return Ok(ret);
+                    Ok(ret)
                 }
                 'a'..='z' => {
                     // Identify control word
-                    // ex: parse "\b Words in bold" -> (Token::ControlWord(ControlWord::Bold), Token::ControlWordArgument("Words in bold")
                     let (mut ident, tail) = slice.split_first_whitespace();
-                    // if ident end with semicolon, strip it for correct value parsing
-                    ident = if ident.chars().last().unwrap_or(' ') == ';' { &ident[0..ident.len() - 1] } else { ident };
-                    let control_word = ControlWord::from(ident)?;
+                    ident = if ident.ends_with(';') { &ident[..ident.len() - 1] } else { ident };
+    
+                    // Try parse control word, fallback for symbols like "-" in \pntext
+                    let control_word = match ControlWord::from(ident) {
+                        Ok(cw) => cw,
+                        Err(_) => {
+                            // Treat as plain text if it cannot be parsed as control word
+                            return Ok(vec![Token::PlainText(slice)]);
+                        }
+                    };
+    
                     let mut ret = vec![Token::ControlSymbol(control_word)];
                     recursive_tokenize!(tail, ret);
-
-                    // \u1234 \u1234 is ok, but \u1234  \u1234 is lost a space, \u1234   \u1234 lost two spaces, and so on
-                    // \u1234  1 -> No need to walk in here, it will enter plain text
-                    if control_word.0 == ControlWord::Unicode && tail.len() > 0 && tail.trim() == "" {
+    
+                    // Handle special case for \u1234 and trailing spaces
+                    if control_word.0 == ControlWord::Unicode && !tail.trim().is_empty() && tail.trim().chars().all(|ch| ch.is_whitespace()) {
                         ret.push(Token::PlainText(tail));
                     }
-                    return Ok(ret);
+    
+                    Ok(ret)
                 }
                 '*' => Ok(vec![Token::IgnorableDestination]),
                 _ => Ok(vec![]),
             },
-            (Some('\n'), Some(_)) => recursive_tokenize!(&slice[1..]), // Ignore the CRLF if it's not escaped
+            (Some('\n'), Some(_)) => recursive_tokenize!(&slice[1..]), // Ignore CRLF if not escaped
             // Handle brackets
             (Some('{'), None) => Ok(vec![Token::OpeningBracket]),
             (Some('}'), None) => Ok(vec![Token::ClosingBracket]),
@@ -139,10 +146,11 @@ impl Lexer {
             // Else, it's plain text
             _ => {
                 let text = slice.trim();
-                if text == "" {
-                    return Ok(vec![]);
+                if text.is_empty() {
+                    Ok(vec![])
+                } else {
+                    Ok(vec![Token::PlainText(slice)])
                 }
-                return Ok(vec![Token::PlainText(slice)]);
             }
         };
     }
