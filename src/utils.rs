@@ -10,7 +10,7 @@ impl StrUtils for str {
         for (i, c) in self.char_indices() {
             if c.is_whitespace() {
                 let first = &self[..i];
-                // +c.len_utf8() чтобы срез начинался после пробела
+                // +c.len_utf8() so that the slice starts after the whitespace
                 let second = &self[i + c.len_utf8()..];
                 return (first, second);
             }
