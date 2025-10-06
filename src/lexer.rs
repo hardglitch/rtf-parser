@@ -42,50 +42,41 @@ pub struct Lexer;
 impl Lexer {
     pub fn scan(src: &str) -> Result<Vec<Token>, LexerError> {
         let src = src.trim(); // Sanitize src : Trim the leading whitespaces
-
-        let mut tokens: Vec<Token> = vec![];
+    
+        let mut tokens: Vec<Token> = Vec::new();
         let mut slice_start_index = 0;
-        let mut current_index = 0;
         let mut previous_char = ' ';
-
-        // This is faster than using an iterator
-        let len = src.len();
-        let bytes = src.as_bytes();
-        let mut i = 0;
-        while i < len {
-            let c = bytes[i] as char;
-            i += 1;
-
+    
+        // Работаем с безопасными UTF-8 индексами
+        for (current_index, c) in src.char_indices() {
             match c {
                 // TODO: Handle char over code 127 for escaped chars
                 // Handle Escaped chars : "\" + any charcode below 127
                 '{' | '}' | '\\' | '\n' if previous_char == '\\' => {}
                 '{' | '}' | '\\' | '\n' => {
-                    // End of slice chars
                     if slice_start_index < current_index {
-                        // Close slice
+                        // Выделяем корректный UTF-8 срез
                         let slice = &src[slice_start_index..current_index];
-                        // Get the corresponding token(s)
                         let slice_tokens = Self::tokenize(slice)?;
-                        tokens.extend_from_slice(&slice_tokens.as_slice());
+                        tokens.extend_from_slice(&slice_tokens);
                         slice_start_index = current_index;
                     }
                 }
-                // Others chars
                 _ => {}
             }
-            current_index += 1;
             previous_char = c;
         }
-        // Manage last token (should always be "}")
-        if slice_start_index < current_index {
-            let slice = &src[slice_start_index..current_index];
+    
+        // Обработка последнего токена
+        if slice_start_index < src.len() {
+            let slice = &src[slice_start_index..];
             if slice != "}" {
                 return Err(LexerError::InvalidLastChar);
             }
             tokens.push(Token::ClosingBracket);
         }
-        return Ok(tokens);
+    
+        Ok(tokens)
     }
 
     /// Get a string slice cut but the scanner and return the coreesponding token(s)
