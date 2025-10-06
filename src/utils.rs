@@ -6,34 +6,20 @@ pub trait StrUtils {
 
 impl StrUtils for str {
     // Split the string at the first whitespace
-    // ex : split_first_whitespace("\b I'm a bold string") -> ("\b", "I'm a bold string")
     fn split_first_whitespace(&self) -> (&str, &str) {
-        let mut first_whitespace_index = 0;
-
-        let len = self.len();
-        let bytes = self.as_bytes();
-        let mut i = 0;
-        // Faster than an iterator
-        while i < len {
-            let c = bytes[i] as char;
-            i += 1;
-
+        for (i, c) in self.char_indices() {
             if c.is_whitespace() {
-                break;
-            } else {
-                first_whitespace_index += 1;
+                let first = &self[..i];
+                // +c.len_utf8() чтобы срез начинался после пробела
+                let second = &self[i + c.len_utf8()..];
+                return (first, second);
             }
         }
-        if first_whitespace_index > 0 && first_whitespace_index != self.len() {
-            return (&self[0..first_whitespace_index], &self[first_whitespace_index + 1..]);
-        } else {
-            return (self, "");
-        }
+        (self, "")
     }
 
     fn is_only_whitespace(&self) -> bool {
-        // TODO
-        false
+        self.chars().all(|c| c.is_whitespace())
     }
 }
 
