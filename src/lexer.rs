@@ -47,7 +47,7 @@ impl Lexer {
         let mut slice_start_index = 0;
         let mut previous_char = ' ';
     
-        // Работаем с безопасными UTF-8 индексами
+        // Working with safe UTF-8 indices
         for (current_index, c) in src.char_indices() {
             match c {
                 // TODO: Handle char over code 127 for escaped chars
@@ -55,7 +55,7 @@ impl Lexer {
                 '{' | '}' | '\\' | '\n' if previous_char == '\\' => {}
                 '{' | '}' | '\\' | '\n' => {
                     if slice_start_index < current_index {
-                        // Выделяем корректный UTF-8 срез
+                        // Extract a valid UTF-8 slice
                         let slice = &src[slice_start_index..current_index];
                         let slice_tokens = Self::tokenize(slice)?;
                         tokens.extend_from_slice(&slice_tokens);
@@ -67,7 +67,7 @@ impl Lexer {
             previous_char = c;
         }
     
-        // Обработка последнего токена
+        // Handling the last token
         if slice_start_index < src.len() {
             let slice = &src[slice_start_index..];
             if slice != "}" {
